@@ -1,5 +1,13 @@
 StitchIt Change Log
 
+
+17/11/15
+- MAJOR: All arguments of preProcessTiles except the sectionsToProcess are now paired keyword/value
+- Add a binRawData to bin the data before stitching. Still needs manual intervention to edit the
+         ini and the recipe files.
+- mergeChannels can write signed tiff files and can use a constant slope for the whole dataset when
+        dividing two channels
+
 17/10/16
 - MAJOR: stitching-related parameters (including average images) are now stored in a separate location 
          to the raw data. So data sets processed prior to this date will need preprocessing again. 

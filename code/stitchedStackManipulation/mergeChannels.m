@@ -29,6 +29,9 @@ function mergeChannels(channels, operation, varargin)
 %             1) a vector of length two [physical section, optical section]. Handles this plane only.
 %             2) matrix defining the first and last planes: [physSec1,optSec1; physSecN,optSecN]. 
 %             3) if empty, attempt to process all available data directories. (default)
+% slope - [scalar, empty by default] for "div" only. The slope to multiply the seecond channel before
+%         subtraction, if empty calculate the slope for each optical section
+% writeSigned - [bool false by default] write signed int16 or unsigned.
 %
 %
 % EXAMPLES
@@ -89,6 +92,8 @@ params.addParameter('destDir', '', @ischar);
 params.addParameter('overwrite', false, @(x) islogical(x) | x==1 | x==0);
 params.addParameter('offset', 0, @isnumeric);
 params.addParameter('sectionRange', [], @isnumeric);
+params.addParameter('slope', [], @isnumeric);
+params.addParameter('writeSigned', false, @(x) islogical(x) | x==1 | x==0);
 
 params.parse(varargin{:});
 
@@ -100,7 +105,8 @@ end
 overwrite = params.Results.overwrite;
 offset = params.Results.offset;
 sectionRange = params.Results.sectionRange;
-
+slope = params.Results.slope;
+writeSigned = params.Results.writeSigned;
 
 %Does the stitched image directory exist?
 if ~exist(stitchedDir,'dir')
@@ -117,7 +123,10 @@ if isempty(strmatch(operation,validOperations))
     return
 end
 
-
+if ~isempty('slope') && ~strcmp(operation, 'div')
+    warning('slope argument is used only for div. Will be ignored')
+end
+    
 %The division handles just two images
 if size(sectionRange,1)<=2 
     section=handleSectionArg(sectionRange);
@@ -263,12 +272,20 @@ parfor ii=1:length(imName)
         case 'div'
             imA = single(theseImages{1});
             imB = single(theseImages{2});
-            fitresult=polyfit(imB,imA,1);
-            mu=imA-imB*fitresult(1);
+            if isempty(slope)
+                fitresult=polyfit(imB,imA,1);
+                mu=imA-imB*fitresult(1);
+            else
+                mu=imA-imB*slope;
+            end
     end
 
     % write the result image
-    imwrite(uint16(mu), fullfile(targetDir,imName{ii}), 'Compression', 'None');
+    if writeSigned
+        stitchit.tools.writeSignedTiff(int16(mu), fullfile(targetDir,imName{ii}), [], overwrite);
+    else
+        imwrite(uint16(mu), fullfile(targetDir,imName{ii}), 'Compression', 'None');
+    end
     fprintf('%s processed\n', imName{ii})
 
 end 
