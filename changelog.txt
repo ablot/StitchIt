@@ -7,6 +7,7 @@ StitchIt Change Log
          ini and the recipe files.
 - mergeChannels can write signed tiff files and can use a constant slope for the whole dataset when
         dividing two channels
+- Image offset is read from ScanImage file header and is not calculated. 
 
 17/10/16
 - MAJOR: stitching-related parameters (including average images) are now stored in a separate location 
