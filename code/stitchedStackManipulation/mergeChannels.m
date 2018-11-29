@@ -29,6 +29,8 @@ function mergeChannels(channels, operation, varargin)
 %             1) a vector of length two [physical section, optical section]. Handles this plane only.
 %             2) matrix defining the first and last planes: [physSec1,optSec1; physSecN,optSecN]. 
 %             3) if empty, attempt to process all available data directories. (default)
+% div_slope - a constant fixed slope used for division. If not provided
+%             optimal slope will be determined for each plane
 %
 %
 % EXAMPLES
@@ -89,6 +91,7 @@ params.addParameter('destDir', '', @ischar);
 params.addParameter('overwrite', false, @(x) islogical(x) | x==1 | x==0);
 params.addParameter('offset', 0, @isnumeric);
 params.addParameter('sectionRange', [], @isnumeric);
+params.addParameter('div_slope', [], @isnumeric);
 
 params.parse(varargin{:});
 
@@ -100,7 +103,7 @@ end
 overwrite = params.Results.overwrite;
 offset = params.Results.offset;
 sectionRange = params.Results.sectionRange;
-
+div_slope = params.Results.div_slope;
 
 %Does the stitched image directory exist?
 if ~exist(stitchedDir,'dir')
@@ -117,6 +120,10 @@ if isempty(strmatch(operation,validOperations))
     return
 end
 
+if ~isempty(div_slope) && ~strcmp(operation, 'div')
+    fprintf('div_slope is only valid for div operation\n')
+    fprintf('QUITTING\n')
+end
 
 %The division handles just two images
 if size(sectionRange,1)<=2 
@@ -263,8 +270,12 @@ parfor ii=1:length(imName)
         case 'div'
             imA = single(theseImages{1});
             imB = single(theseImages{2});
-            fitresult=polyfit(imB,imA,1);
-            mu=imA-imB*fitresult(1);
+            if ~isempty(div_slope)
+                mu = imA - imB * div_slope
+            else
+                fitresult=polyfit(imB,imA,1);
+                mu=imA-imB*fitresult(1);
+            end
     end
 
     % write the result image
