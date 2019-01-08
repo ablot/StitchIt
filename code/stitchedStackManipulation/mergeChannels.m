@@ -250,8 +250,8 @@ parfor ii=1:length(imName)
                 mu = mu + theseImages{kk};
             end
         case 'sub'
-            mu = ones(size(theseImages{1}), class(theseImages{1})) * offset; 
-            for kk=1:length(theseImages)
+            mu = theseImages{1} + offset; 
+            for kk=2:length(theseImages)
                 mu = mu - theseImages{kk};
             end
         case 'ave'
