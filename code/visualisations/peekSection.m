@@ -76,7 +76,7 @@ if ischar(channel) && ( strcmpi(channel,'rgb') || strcmpi(channel,'fratzl') )
           channel = channel-1; % This is the hack
           channel(channel<1)=1; %So red and far red are both red
         else
-          channel = 1:length(channel);
+          channel = length(channel):-1:1;
         end
         
         
