@@ -11,7 +11,7 @@ function startBackgroundWebPreview(chanToPlot,config)
     % The script file name we will build to run the background task
     params = readMetaData2Stitchit;
     micName = strrep(params.System.ID,' ','_');
-    username = getenv('username');
+    username = char(java.lang.System.getProperty('user.name'));
     pathToBSfile = fullfile(tempdir,['webPreviewBootstrap_', username, '_', ,micName,'.m']);
     logFilePath = fullfile(tempdir,['webPreviewLogFile_', username, '_', micName]);
     
